@@ -73,7 +73,14 @@
 				detect();
 			}, 100);
 		} else {
-			errorMsg.textContent = "Looks like your browser does not support FaceDetector API. If you're on Chrome, please make sure you've the latest update and enable the #enable-experimental-web-platform-features flag from chrome://flags";
+
+			// Find if user is using Chrome, and if yes, check version number. Face Detection API has been in the browser since M57
+			const chromeVer = /Chrome\/(\d+)/.exec(navigator.userAgent);
+			if (chromeVer && parseInt(chromeVer[1]) > 56) {
+				errorMsg.textContent = "Looks like your version of Chrome supports FaceDetector API but you haven't enabled it (since experimental features in Chrome are disabled by default). You can enable it by going to the URL 'chrome://flags#enable-experimental-web-platform-features' and enabling the 'Experimental Web Platform features'"
+			} else {
+				errorMsg.textContent = "Looks like your browser does not support FaceDetector API. If you're on Chrome, please make sure you've the latest update and enable the #enable-experimental-web-platform-features flag from chrome://flags";
+			}
 		}
 	</script>
 	<!-- Global site tag (gtag.js) - Google Analytics -->
