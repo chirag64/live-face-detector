@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Live Face Detector</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style>
+	</style>
+</head>
+
+<body>
+	<div class="main-container">
+		<video width="0" height="0" autoplay></video>
+		<canvas width="640" height="480"></canvas>
+	</div>
+	<script>
+		// Initializing vars & consts
+		const video = document.querySelector('video');
+		const canvas = document.querySelector('canvas');
+		const context = canvas.getContext('2d');
+		const faceDetector = new FaceDetector();
+
+		// Get access to the camera
+		if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+			navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+				video.src = window.URL.createObjectURL(stream);
+				video.play();
+			});
+		}
+
+		async function detect() {
+			const faces = await faceDetector.detect(canvas);
+			drawFaces(faces);
+		}
+
+		// Draw face highlighters
+		async function drawFaces(faces) {
+			faces.forEach(face => {
+
+				const { width, height, top, left } = face.boundingBox;
+
+				context.strokeStyle = '#00FF00';
+				context.lineWidth = 5;
+				context.strokeRect(left, top, width, height);
+
+				face.landmarks.forEach(landmark => {
+					context.lineWidth = 1;
+					if (landmark.type === 'eye') {
+						context.strokeStyle = '#FF0000';
+						context.strokeRect(landmark.location.x - 20, landmark.location.y - 20, 40, 20);
+					} else {
+						context.strokeStyle = '#0000FF';
+						context.strokeRect(landmark.location.x - 40, landmark.location.y - 40, 80, 40);
+					}
+				});
+			});
+		}
+
+		setInterval(() => {
+			context.drawImage(video, 0, 0, canvas.width, canvas.height);
+			detect();
+		}, 100);
+
+	</script>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-116311938-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag() { dataLayer.push(arguments); }
+		gtag('js', new Date());
+
+		gtag('config', 'UA-116311938-1');
+	</script>
+
+</body>
+
+</html>
